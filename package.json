@@ -1,0 +1,11 @@
+{
+  "name": "ruoyi-mobile",
+  "version": "1.0.0",
+  "description": "涵涵通知移动端（uni-app）",
+  "main": "main.js",
+  "dependencies": {
+    "crypto-js": "4.2.0",
+    "jsencrypt": "3.3.2",
+    "lunar-javascript": "^1.7.3"
+  }
+}

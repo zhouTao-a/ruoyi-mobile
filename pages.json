@@ -1,0 +1,122 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "首页",
+        "app-plus": {
+          "scrollIndicator": "none",
+          "bounce": "vertical"
+        }
+      }
+    },
+    {
+      "path": "pages/login/index",
+      "style": {
+        "navigationBarTitleText": "登录",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/rec/index",
+      "style": {
+        "navigationBarTitleText": "记录"
+      }
+    },
+    {
+      "path": "pages/rec/task",
+      "style": {
+        "navigationBarTitleText": "任务"
+      }
+    },
+    {
+      "path": "pages/rec/report",
+      "style": {
+        "navigationBarTitleText": "报告"
+      }
+    },
+    {
+      "path": "pages/rec/reflection",
+      "style": {
+        "navigationBarTitleText": "感想"
+      }
+    },
+    {
+      "path": "pages/rec/goal",
+      "style": {
+        "navigationBarTitleText": "目标"
+      }
+    },
+    {
+      "path": "pages/rec/introspect",
+      "style": {
+        "navigationBarTitleText": "自省"
+      }
+    },
+    {
+      "path": "pages/msg/index",
+      "style": {
+        "navigationBarTitleText": "通知"
+      }
+    },
+    {
+      "path": "pages/msg/user",
+      "style": {
+        "navigationBarTitleText": "用户"
+      }
+    },
+    {
+      "path": "pages/msg/matter",
+      "style": {
+        "navigationBarTitleText": "事件"
+      }
+    },
+    {
+      "path": "pages/mine/index",
+      "style": {
+        "navigationBarTitleText": "我的"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "涵涵通知",
+    "navigationBarBackgroundColor": "#ffffff",
+    "backgroundColor": "#f5f6f8",
+    "app-plus": {
+      "scrollIndicator": "none"
+    }
+  },
+  "tabBar": {
+    "color": "#8a8a8a",
+    "selectedColor": "#2f6fed",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "static/tab-home-v2.png",
+        "selectedIconPath": "static/tab-home-active-v2.png"
+      },
+      {
+        "pagePath": "pages/rec/index",
+        "text": "记录",
+        "iconPath": "static/tab-rec-v2.png",
+        "selectedIconPath": "static/tab-rec-active-v2.png"
+      },
+      {
+        "pagePath": "pages/msg/index",
+        "text": "通知",
+        "iconPath": "static/tab-msg-v2.png",
+        "selectedIconPath": "static/tab-msg-active-v2.png"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的",
+        "iconPath": "static/tab-mine-v2.png",
+        "selectedIconPath": "static/tab-mine-active-v2.png"
+      }
+    ]
+  }
+}
