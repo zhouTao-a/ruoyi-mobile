@@ -1,5 +1,24 @@
 /* 全局 SCSS 变量 */
 $primary: #2f6fed;
-$bg: #f5f6f8;
+$bg: #f5f7fa;
 $text: #1f2329;
 $muted: #8a8a8a;
+
+/* 状态色板 */
+$success: #389e0d;
+$warning: #d46b08;
+$danger: #e34d59;
+$info: #2f6fed;
+$purple: #722ed1;
+$teal: #13a8a8;
+
+/* 圆角分档 */
+$radius-card: 24rpx;
+$radius-mid: 20rpx;
+$radius-btn: 16rpx;
+$radius-chip: 999rpx;
+
+/* 阴影分档 */
+$shadow-card: 0 4rpx 16rpx rgba(31, 35, 41, 0.05);
+$shadow-float: 0 8rpx 24rpx rgba(47, 111, 237, 0.12);
+$shadow-dock: 0 -4rpx 24rpx rgba(31, 35, 41, 0.08);

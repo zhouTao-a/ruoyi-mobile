@@ -26,31 +26,41 @@
     {
       "path": "pages/rec/task",
       "style": {
-        "navigationBarTitleText": "任务"
+        "navigationBarTitleText": "任务",
+        "enablePullDownRefresh": true,
+        "onReachBottomDistance": 120
       }
     },
     {
       "path": "pages/rec/report",
       "style": {
-        "navigationBarTitleText": "报告"
+        "navigationBarTitleText": "报告",
+        "enablePullDownRefresh": true,
+        "onReachBottomDistance": 120
       }
     },
     {
       "path": "pages/rec/reflection",
       "style": {
-        "navigationBarTitleText": "感想"
+        "navigationBarTitleText": "感想",
+        "enablePullDownRefresh": true,
+        "onReachBottomDistance": 120
       }
     },
     {
       "path": "pages/rec/goal",
       "style": {
-        "navigationBarTitleText": "目标"
+        "navigationBarTitleText": "目标",
+        "enablePullDownRefresh": true,
+        "onReachBottomDistance": 120
       }
     },
     {
       "path": "pages/rec/introspect",
       "style": {
-        "navigationBarTitleText": "自省"
+        "navigationBarTitleText": "自省",
+        "enablePullDownRefresh": true,
+        "onReachBottomDistance": 120
       }
     },
     {
@@ -62,13 +72,17 @@
     {
       "path": "pages/msg/user",
       "style": {
-        "navigationBarTitleText": "用户"
+        "navigationBarTitleText": "用户",
+        "enablePullDownRefresh": true,
+        "onReachBottomDistance": 120
       }
     },
     {
       "path": "pages/msg/matter",
       "style": {
-        "navigationBarTitleText": "事件"
+        "navigationBarTitleText": "事件",
+        "enablePullDownRefresh": true,
+        "onReachBottomDistance": 120
       }
     },
     {
@@ -82,7 +96,7 @@
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "涵涵通知",
     "navigationBarBackgroundColor": "#ffffff",
-    "backgroundColor": "#f5f6f8",
+    "backgroundColor": "#f3f5f9",
     "app-plus": {
       "scrollIndicator": "none"
     }

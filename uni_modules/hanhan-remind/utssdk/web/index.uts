@@ -1,0 +1,5 @@
+export function syncAlarms(payload: string): void {}
+
+export function setTodayCount(count: number): void {}
+
+export function clearPhoneRemind(): void {}

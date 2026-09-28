@@ -63,14 +63,16 @@ export const NOTIFY_STATUS = [
 ]
 
 export const GENDER = [
-  { value: '男', label: '男', color: '#2f6fed', bg: '#e8f0ff' },
-  { value: '女', label: '女', color: '#eb2f96', bg: '#fff0f6' }
+  { value: '0', label: '男', color: '#2f6fed', bg: '#e8f0ff', alias: ['男', 'male'] },
+  { value: '1', label: '女', color: '#eb2f96', bg: '#fff0f6', alias: ['女', 'female'] },
+  { value: '2', label: '未知', color: '#8a8a8a', bg: '#f5f5f5', alias: ['未知'] }
 ]
 
 export function findOption(list, value) {
+  const options = Array.isArray(list) ? list : []
   if (value === undefined || value === null || String(value).trim() === '') return EMPTY
   const key = String(value).trim()
-  const hit = list.find((item) => item.value === key || (item.alias || []).includes(key))
+  const hit = options.find((item) => item.value === key || (item.alias || []).includes(key))
   if (hit) return hit
   return { value: key, label: key, color: '#4e5969', bg: '#f3f4f6' }
 }

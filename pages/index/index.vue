@@ -7,7 +7,7 @@
       <text class="month-btn" @click="shiftMonth(1)">下月</text>
     </view>
 
-    <view class="calendar card">
+    <view class="calendar card" @touchstart="onCalStart" @touchend="onCalEnd">
       <view class="week-row">
         <text v-for="w in weeks" :key="w" class="week">{{ w }}</text>
       </view>
@@ -24,12 +24,14 @@
           </view>
           <text v-if="d.lunar" class="lunar">{{ d.lunar }}</text>
           <view v-if="d.icons.length" class="icon-row">
-            <text
+            <view
               v-for="(ic, i) in d.icons"
               :key="i"
-              class="evt-icon"
-              :style="{ color: ic.color }"
-            >{{ ic.emoji }}</text>
+              class="evt-dot"
+              :style="{ background: ic.bg }"
+            >
+              <text class="evt-icon" :style="{ color: ic.color }">{{ ic.emoji }}</text>
+            </view>
           </view>
         </view>
       </view>
@@ -40,7 +42,9 @@
       <view class="section-title">本月提醒</view>
       <view v-if="!monthReminders.length" class="empty">暂无提醒</view>
       <view v-for="(item, i) in monthReminders" :key="i" class="reminder-item">
-        <text class="evt-icon list-icon" :style="{ color: typeMeta(item).color }">{{ typeMeta(item).emoji }}</text>
+        <view class="list-icon" :style="{ background: typeMeta(item).bg }">
+          <text class="evt-icon" :style="{ color: typeMeta(item).color }">{{ typeMeta(item).emoji }}</text>
+        </view>
         <text class="tag" :style="{ color: typeMeta(item).color, background: typeMeta(item).bg }">
           {{ typeMeta(item).label }}
         </text>
@@ -53,7 +57,9 @@
       <view class="detail-sheet card" @click.stop>
         <view class="detail-title">{{ detailTitle }}</view>
         <view v-for="(item, i) in detailList" :key="i" class="reminder-item">
-          <text class="evt-icon list-icon" :style="{ color: typeMeta(item).color }">{{ typeMeta(item).emoji }}</text>
+          <view class="list-icon" :style="{ background: typeMeta(item).bg }">
+            <text class="evt-icon" :style="{ color: typeMeta(item).color }">{{ typeMeta(item).emoji }}</text>
+          </view>
           <text class="tag" :style="{ color: typeMeta(item).color, background: typeMeta(item).bg }">
             {{ typeMeta(item).label }}
           </text>
@@ -80,6 +86,8 @@
         </picker-view>
       </view>
     </view>
+
+    <custom-tab-bar current="pages/index/index" />
   </view>
 </template>
 
@@ -89,6 +97,7 @@ import { onShow } from '@dcloudio/uni-app'
 import { Lunar } from 'lunar-javascript'
 import { dayMatterList } from '@/api/msg/matter.js'
 import { getToken } from '@/utils/auth.js'
+import CustomTabBar from '@/components/custom-tab-bar.vue'
 
 const weeks = ['日', '一', '二', '三', '四', '五', '六']
 const now = new Date()
@@ -211,6 +220,26 @@ const loadReminders = async () => {
   }
 }
 
+let calX = 0
+let calY = 0
+
+/** 左滑下月，右滑上月；上下滑留给页面滚动 */
+const onCalStart = (e) => {
+  const t = (e.changedTouches && e.changedTouches[0]) || (e.touches && e.touches[0])
+  if (!t) return
+  calX = t.clientX
+  calY = t.clientY
+}
+
+const onCalEnd = (e) => {
+  const t = e.changedTouches && e.changedTouches[0]
+  if (!t) return
+  const dx = t.clientX - calX
+  const dy = t.clientY - calY
+  if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return
+  shiftMonth(dx < 0 ? 1 : -1)
+}
+
 const shiftMonth = (delta) => {
   let m = month.value + delta
   let y = year.value
@@ -277,6 +306,7 @@ watch([year, month], () => {
 })
 
 onShow(() => {
+  uni.hideTabBar({ animation: false })
   if (!getToken()) {
     uni.reLaunch({ url: '/pages/login/index' })
     return
@@ -290,6 +320,7 @@ onShow(() => {
   overflow-x: hidden;
   width: 100%;
   box-sizing: border-box;
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
 }
 .home-page::-webkit-scrollbar {
   width: 0;
@@ -314,9 +345,10 @@ onShow(() => {
 .title {
   flex: 1;
   text-align: center;
-  font-size: 30rpx;
-  font-weight: 600;
+  font-size: 36rpx;
+  font-weight: 700;
   padding: 8rpx 4rpx;
+  letter-spacing: 1rpx;
 }
 .today-btn {
   flex-shrink: 0;
@@ -357,9 +389,13 @@ onShow(() => {
 .day-cell.muted {
   opacity: 0.35;
 }
-.day-cell.active:not(.today) {
+.day-cell.active:not(.today) .solar-wrap {
   background: #e8f0ff;
-  border-radius: 12rpx;
+  border-radius: 50%;
+}
+.day-cell.active:not(.today) .solar {
+  color: #2f6fed;
+  font-weight: 700;
 }
 .solar-wrap {
   display: inline-flex;
@@ -390,35 +426,69 @@ onShow(() => {
 .icon-row {
   display: flex;
   justify-content: center;
-  gap: 4rpx;
-  margin-top: 4rpx;
-  min-height: 28rpx;
+  gap: 6rpx;
+  margin-top: 6rpx;
+  min-height: 32rpx;
+}
+/* 日历格子内的事件圆点：彩色底 + emoji */
+.evt-dot {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .evt-icon {
   font-size: 22rpx;
   line-height: 1;
 }
+/* 提醒列表里的圆形彩色图标底 */
 .list-icon {
-  font-size: 28rpx;
-  margin-right: 8rpx;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16rpx;
   flex-shrink: 0;
 }
+.list-icon .evt-icon {
+  font-size: 32rpx;
+}
 .section-title {
-  font-weight: 600;
-  margin-bottom: 16rpx;
+  display: flex;
+  align-items: center;
+  font-size: 30rpx;
+  font-weight: 700;
+  margin-bottom: 12rpx;
+  letter-spacing: 0.5rpx;
+}
+.section-title::before {
+  content: '';
+  width: 6rpx;
+  height: 28rpx;
+  background: #2f6fed;
+  border-radius: 4rpx;
+  margin-right: 12rpx;
 }
 .reminder-item {
   display: flex;
-  align-items: flex-start;
-  padding: 16rpx 0;
-  border-bottom: 1px solid #f0f0f0;
+  align-items: center;
+  margin-top: 16rpx;
+  padding: 18rpx 20rpx;
+  background: #f7f8fb;
+  border-radius: 20rpx;
 }
 .tag {
   font-size: 22rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 8rpx;
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
   margin-right: 16rpx;
   flex-shrink: 0;
+  font-weight: 600;
+  letter-spacing: 0.5rpx;
 }
 .content {
   flex: 1;

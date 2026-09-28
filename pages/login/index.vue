@@ -1,7 +1,10 @@
 <template>
   <view class="login-page">
-    <view class="brand">涵涵通知</view>
-    <view class="sub">移动端</view>
+    <view class="brand-wrap">
+      <view class="brand-mark">涵</view>
+      <view class="brand">涵涵通知</view>
+      <view class="sub">移动端</view>
+    </view>
 
     <view class="form card">
       <view class="field">
@@ -78,18 +81,39 @@ const handleLogin = async () => {
 .login-page {
   min-height: 100vh;
   padding: 160rpx 48rpx 48rpx;
-  background: linear-gradient(180deg, #e8f0ff 0%, #f5f6f8 45%);
+  background: linear-gradient(180deg, #e8f0ff 0%, #f5f7fa 42%);
   box-sizing: border-box;
 }
-.brand {
+.brand-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 64rpx;
+}
+.brand-mark {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 28rpx;
+  background: linear-gradient(135deg, #4d8bff 0%, #2f6fed 100%);
+  color: #fff;
   font-size: 56rpx;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24rpx;
+  box-shadow: 0 12rpx 28rpx rgba(47, 111, 237, 0.32);
+}
+.brand {
+  font-size: 64rpx;
+  font-weight: 700;
   color: #1f2329;
+  letter-spacing: 2rpx;
 }
 .sub {
-  margin-top: 8rpx;
+  margin-top: 12rpx;
   color: #8a8a8a;
-  margin-bottom: 64rpx;
+  font-size: 26rpx;
 }
 .field {
   margin-bottom: 28rpx;
@@ -97,13 +121,20 @@ const handleLogin = async () => {
 .label {
   display: block;
   margin-bottom: 12rpx;
-  color: #555;
+  color: #4e5969;
+  font-size: 26rpx;
 }
 .input {
-  background: #f3f4f6;
-  border-radius: 12rpx;
+  background: #fff;
+  border: 1px solid #e6e8ee;
+  border-radius: 16rpx;
   padding: 22rpx 24rpx;
   font-size: 28rpx;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.input:focus {
+  border-color: #2f6fed;
+  box-shadow: 0 0 0 6rpx rgba(47, 111, 237, 0.12);
 }
 .submit {
   margin-top: 16rpx;

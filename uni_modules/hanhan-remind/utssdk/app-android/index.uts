@@ -1,0 +1,13 @@
+import { RemindNative } from 'uts.sdk.modules.hanhanRemind'
+
+export function syncAlarms(payload: string): void {
+  RemindNative.sync(payload)
+}
+
+export function setTodayCount(count: number): void {
+  RemindNative.setTodayCount(count.toInt())
+}
+
+export function clearPhoneRemind(): void {
+  RemindNative.clear()
+}

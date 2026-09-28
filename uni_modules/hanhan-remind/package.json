@@ -1,0 +1,19 @@
+{
+  "id": "hanhan-remind",
+  "displayName": "涵涵通知本地闹钟",
+  "version": "1.0.0",
+  "description": "按下次提醒时间登记安卓闹钟，并在桌面图标上显示今日事件数",
+  "uni_modules": {
+    "dependencies": [],
+    "encrypt": [],
+    "platforms": {
+      "client": {
+        "App": {
+          "app-android": "y",
+          "app-ios": "n"
+        },
+        "H5": "y"
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="uts.sdk.modules.hanhanRemind">
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <application>
+        <!-- 开机或覆盖安装后，按上次同步结果重新登记，不依赖用户先打开页面 -->
+        <receiver
+            android:name="uts.sdk.modules.hanhanRemind.RemindReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+        <!-- 到点广播：发出会响的通知，并打开响铃页 -->
+        <receiver
+            android:name="uts.sdk.modules.hanhanRemind.AlarmReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <!-- 前台守护服务：保持进程，锁屏后到点能稳定拉起 -->
+        <service
+            android:name="uts.sdk.modules.hanhanRemind.GuardService"
+            android:enabled="true"
+            android:exported="false" />
+        <activity
+            android:name="uts.sdk.modules.hanhanRemind.AlarmActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar" />
+    </application>
+</manifest>

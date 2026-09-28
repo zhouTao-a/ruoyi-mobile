@@ -7,6 +7,7 @@
         :key="opt.value"
         class="chip"
         :class="{ on: String(modelValue) === String(opt.value) }"
+        :style="String(modelValue) === String(opt.value) && opt.color ? { color: opt.color, background: opt.bg, boxShadow: '0 2rpx 8rpx ' + opt.color + '22' } : null"
         @click="emit('update:modelValue', opt.value)"
       >{{ opt.label }}</text>
     </view>

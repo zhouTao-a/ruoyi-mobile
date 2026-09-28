@@ -1,0 +1,14 @@
+/**
+ * 用待响列表整体替换手机上已登记的闹钟。payload 为 JSON 数组：[{id,title,at}]
+ */
+export function syncAlarms(payload: string): void
+
+/**
+ * 桌面图标上的今日事件数。0 表示清掉角标和汇总通知。
+ */
+export function setTodayCount(count: number): void
+
+/**
+ * 退出登录时取消全部闹钟和角标。
+ */
+export function clearPhoneRemind(): void
