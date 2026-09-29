@@ -27,7 +27,7 @@
           <text class="card-title">{{ item.dayName }}</text>
           <view class="card-meta">
             <text class="meta-chip" :style="typeChipStyle(item)">{{ dictLabel(typeDict, item.dayType) }}</text>
-            <text class="meta-text">{{ item.dayTarget || '未设时间' }}</text>
+            <text class="meta-text">{{ item.nextNotifyTime || item.dayTarget || '未设时间' }}</text>
           </view>
         </view>
       </view>

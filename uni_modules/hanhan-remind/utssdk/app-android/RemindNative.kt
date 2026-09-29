@@ -153,9 +153,20 @@ object RemindNative {
 
     @JvmStatic
     fun snooze(context: Context, id: String, title: String) {
-        val at = System.currentTimeMillis() + SNOOZE_MS
+        snooze(context, id, title, 10)
+    }
+
+    @JvmStatic
+    fun snooze(context: Context, id: String, title: String, minutes: Int) {
+        val safeMinutes = if (minutes < 1) 10 else minutes
+        val at = System.currentTimeMillis() + safeMinutes * 60_000L
+        Log.i(TAG, "snooze: id=$id minutes=$safeMinutes at=${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.CHINA).format(java.util.Date(at))}")
         upsert(context, id, title, at)
-        scheduleOne(context, id, title, at)
+        // 用 Application 上下文登记，避免 Activity 销毁后 context 失效
+        val appCtx = appContext() ?: context.applicationContext
+        // 先取消旧闹钟，再登记新的，避免 PendingIntent 复用导致系统未更新
+        cancelAlarm(appCtx, id)
+        scheduleOne(appCtx, id, title, at)
         cancelNotify(context, id)
         silence()
         refreshRemaining(context)
@@ -316,14 +327,17 @@ object RemindNative {
     }
 
     private fun scheduleOne(context: Context, id: String, title: String, at: Long) {
-        if (id.isBlank() || at <= System.currentTimeMillis()) return
+        if (id.isBlank() || at <= System.currentTimeMillis()) {
+            Log.d(TAG, "skip schedule: id=$id at=$at now=${System.currentTimeMillis()}")
+            return
+        }
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        // 到点走广播，避免系统拦掉直接打开的页面后连通知都没有。
-        // 状态栏闹钟图标单独打开首页，不能和到点动作共用同一个意图。
+        // 到点走广播，广播里发会响的通知并响铃。前台服务保活进程，锁屏广播能稳定收到。
         val fire = alarmFirePending(context, id, title)
         val show = openAppPending(context) ?: alarmOpenPending(context, id, title)
         try {
             am.setAlarmClock(AlarmManager.AlarmClockInfo(at, show), fire)
+            Log.i(TAG, "scheduled: id=$id at=$at (${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.CHINA).format(java.util.Date(at))})")
         } catch (e: Exception) {
             Log.w(TAG, "setAlarmClock failed", e)
             promptExactAlarmOnce(context)
@@ -340,6 +354,7 @@ object RemindNative {
     /** 到点先发通知并响铃，再尝试打开响铃页。页面被系统拦住时，通知本身仍会响。 */
     @JvmStatic
     fun onAlarmFired(context: Context, id: String, title: String) {
+        Log.i(TAG, "alarm fired: id=$id title=$title")
         val shown = if (title.isBlank()) "事件提醒" else title
         showAlarmNotification(context, id, shown)
         AlarmActivity.beginRing(context)
@@ -652,6 +667,7 @@ class GuardService : Service() {
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         val action = intent?.action ?: return
+        Log.i("HanhanRemind", "AlarmReceiver onReceive: action=$action")
         if (action.startsWith("com.hanhan.remind.STOP.")) {
             RemindNative.silence()
             return
@@ -671,6 +687,7 @@ class AlarmActivity : Activity() {
     private val handler = Handler(Looper.getMainLooper())
     private val stopTask = Runnable {
         RemindNative.silence()
+        RemindNative.refreshRemaining(this)
         finish()
     }
 
@@ -708,52 +725,131 @@ class AlarmActivity : Activity() {
         val root = LinearLayout(this)
         root.orientation = LinearLayout.VERTICAL
         root.gravity = Gravity.CENTER_HORIZONTAL
-        root.setBackgroundColor(Color.WHITE)
+        // 深色渐变背景，夜间闹钟不刺眼
+        val gradient = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(Color.parseColor("#1a1f2e"), Color.parseColor("#2d3561"))
+        )
+        root.background = gradient
         val pad = dp(28)
-        root.setPadding(pad, dp(72), pad, pad)
+        root.setPadding(pad, dp(96), pad, dp(48))
 
-        val name = TextView(this)
-        name.text = if (title.isBlank()) "事件提醒" else title
-        name.setTextColor(Color.parseColor("#1f2329"))
-        name.setTextSize(TypedValue.COMPLEX_UNIT_SP, 28f)
-        name.typeface = Typeface.DEFAULT_BOLD
-        name.gravity = Gravity.CENTER
-        root.addView(name, LinearLayout.LayoutParams(
+        // 闹钟图标
+        val icon = TextView(this)
+        icon.text = "⏰"
+        icon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 72f)
+        icon.gravity = Gravity.CENTER
+        root.addView(icon, LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         ))
 
+        // 事件名称
+        val name = TextView(this)
+        name.text = if (title.isBlank()) "事件提醒" else title
+        name.setTextColor(Color.WHITE)
+        name.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
+        name.typeface = Typeface.DEFAULT_BOLD
+        name.gravity = Gravity.CENTER
+        val nameLp = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        nameLp.topMargin = dp(24)
+        root.addView(name, nameLp)
+
+        // 副标题
         val hint = TextView(this)
         hint.text = "事件提醒"
-        hint.setTextColor(Color.parseColor("#8a8a8a"))
+        hint.setTextColor(Color.parseColor("#a0a8c0"))
         hint.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
         hint.gravity = Gravity.CENTER
         val hintLp = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
-        hintLp.topMargin = dp(12)
-        hintLp.bottomMargin = dp(48)
+        hintLp.topMargin = dp(8)
+        hintLp.bottomMargin = dp(64)
         root.addView(hint, hintLp)
 
+        // 停止按钮：红色填充
         val stop = Button(this)
         stop.text = "停止"
+        stop.setTextColor(Color.WHITE)
+        stop.textSize = 16f
+        stop.background = roundRectDrawable(Color.parseColor("#e34d59"), dp(26))
         stop.setOnClickListener {
             RemindNative.dismiss(this, id)
             finish()
         }
         root.addView(stop, buttonLayout())
 
+        // 稍后提醒按钮：半透明白，点击后选择分钟数
         val snooze = Button(this)
-        snooze.text = "10分钟后再响"
+        snooze.text = "稍后提醒"
+        snooze.setTextColor(Color.WHITE)
+        snooze.textSize = 16f
+        snooze.background = roundRectDrawable(Color.parseColor("#40ffffff"), dp(26))
         snooze.setOnClickListener {
-            RemindNative.snooze(this, id, title)
-            finish()
+            showSnoozePicker(id, title)
         }
         val snoozeLp = buttonLayout()
         snoozeLp.topMargin = dp(16)
         root.addView(snooze, snoozeLp)
         return root
+    }
+
+    /** 弹出选择框，选几分钟后提醒，方便测试可自定义分钟数 */
+    private fun showSnoozePicker(id: String, title: String) {
+        val items = arrayOf("5分钟后", "10分钟后", "15分钟后", "30分钟后", "自定义分钟数")
+        android.app.AlertDialog.Builder(this)
+            .setTitle("稍后提醒")
+            .setItems(items) { _, which ->
+                if (which == 4) {
+                    showCustomSnooze(id, title)
+                } else {
+                    val minutes = intArrayOf(5, 10, 15, 30)[which]
+                    RemindNative.snooze(this, id, title, minutes)
+                    finish()
+                }
+            }
+            .show()
+    }
+
+    /** 自定义分钟数输入 */
+    private fun showCustomSnooze(id: String, title: String) {
+        val input = android.widget.EditText(this)
+        input.inputType = android.text.InputType.TYPE_CLASS_NUMBER
+        input.hint = "请输入分钟数"
+        val container = LinearLayout(this)
+        container.setPadding(dp(24), dp(16), dp(24), 0)
+        container.addView(input, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ))
+        android.app.AlertDialog.Builder(this)
+            .setTitle("自定义分钟后提醒")
+            .setView(container)
+            .setPositiveButton("确定") { _, _ ->
+                val text = input.text.toString().trim()
+                val minutes = text.toIntOrNull()
+                if (minutes != null && minutes > 0) {
+                    RemindNative.snooze(this, id, title, minutes)
+                    finish()
+                } else {
+                    android.widget.Toast.makeText(this, "请输入有效的分钟数", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    /** 生成圆角矩形背景 */
+    private fun roundRectDrawable(color: Int, radius: Int): android.graphics.drawable.GradientDrawable {
+        val drawable = android.graphics.drawable.GradientDrawable()
+        drawable.setColor(color)
+        drawable.cornerRadius = radius.toFloat()
+        return drawable
     }
 
     private fun buttonLayout(): LinearLayout.LayoutParams {
